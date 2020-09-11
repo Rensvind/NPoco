@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-#if !DNXCORE50
 using System.Data;
-#endif
 using System.Globalization;
 using System.IO;
 using System.Collections.Specialized;
@@ -73,9 +71,7 @@ namespace NPoco.fastJSON
         public List<Type> IgnoreAttributes = new List<Type>
         {
             typeof(System.Xml.Serialization.XmlIgnoreAttribute),
-#if !DNXCORE50
             typeof(NonSerializedAttribute)
-#endif
         };
 
         /// <summary>
@@ -437,12 +433,12 @@ namespace NPoco.fastJSON
             object o = new JsonParser(json, _params.AllowNonQuotedKeys).Decode();
             if (o == null)
                 return null;
-#if !DNXCORE50
+
             if (type != null && type == typeof(DataSet))
                 return CreateDataset(o as Dictionary<string, object>, null);
             else if (type != null && type == typeof(DataTable))
                 return CreateDataTable(o as Dictionary<string, object>, null);
-#endif
+
             if (o is IDictionary)
             {
                 if (type != null && t == typeof(Dictionary<,>)) // deserialize a dictionary
@@ -750,12 +746,12 @@ namespace NPoco.fastJSON
                 _usingglobals = true;
 
             bool found = d.TryGetValue("$type", out tn);
-#if !DNXCORE50
+
             if (found == false && type == typeof(System.Object))
             {
                 return d;   // CreateDataset(d, globaltypes);
             }
-#endif
+
             if (found)
             {
                 if (_usingglobals)
@@ -774,11 +770,9 @@ namespace NPoco.fastJSON
             object o = input;
             if (o == null)
             {
-#if !DNXCORE50
                 if (_params.ParametricConstructorOverride)
                     o = System.Runtime.Serialization.FormatterServices.GetUninitializedObject(type);
                 else
-#endif
                     o = Reflection.Instance.FastCreateInstance(type);
             }
             int circount = 0;
@@ -841,11 +835,9 @@ namespace NPoco.fastJSON
                                 // what about 'else'?
                                 break;
                             case myPropInfoType.ByteArray: oset = Convert.FromBase64String((string)v); break;
-#if !DNXCORE50
                             case myPropInfoType.DataSet: oset = CreateDataset((Dictionary<string, object>)v, globaltypes); break;
                             case myPropInfoType.DataTable: oset = CreateDataTable((Dictionary<string, object>)v, globaltypes); break;
                             case myPropInfoType.Hashtable: // same case as Dictionary
-#endif
                             case myPropInfoType.Dictionary: oset = CreateDictionary((List<object>)v, pi.pt, pi.GenericTypes, globaltypes); break;
                             case myPropInfoType.StringKeyDictionary: oset = CreateStringKeyDictionary((Dictionary<string, object>)v, pi.pt, pi.GenericTypes, globaltypes); break;
                             case myPropInfoType.NameValue: oset = CreateNV((Dictionary<string, object>)v); break;
@@ -1145,7 +1137,6 @@ namespace NPoco.fastJSON
             return col;
         }
 
-#if !DNXCORE50
         private DataSet CreateDataset(Dictionary<string, object> reader, Dictionary<string, object> globalTypes)
         {
             DataSet ds = new DataSet();
@@ -1277,7 +1268,6 @@ namespace NPoco.fastJSON
 
             return dt;
         }
-#endif
         #endregion
     }
 

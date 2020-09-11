@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using System.Linq;
-using NPoco;
 using NPoco.FluentMappings;
 using NPoco.Tests.Common;
 using NUnit.Framework;

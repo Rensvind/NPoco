@@ -2,12 +2,11 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
-using System.Data.SqlClient;
 using System.Linq;
+using Microsoft.Data.SqlClient;
 
 namespace NPoco
 {
-#if !DNXCORE50
     public class SqlBulkCopyHelper
     {
         public static Func<DbConnection, SqlConnection> SqlConnectionResolver = dbConn => (SqlConnection)dbConn;
@@ -26,7 +25,6 @@ namespace NPoco
                 bulkCopy.WriteToServer(table);
             }
         }
-#if NET45 || NETSTANDARD20
         public static async System.Threading.Tasks.Task BulkInsertAsync<T>(IDatabase db, IEnumerable<T> list, SqlBulkCopyOptions sqlBulkCopyOptions)
         {
             using (var bulkCopy = new SqlBulkCopy(SqlConnectionResolver(db.Connection), sqlBulkCopyOptions, SqlTransactionResolver(db.Transaction)))
@@ -35,11 +33,10 @@ namespace NPoco
                 await bulkCopy.WriteToServerAsync(table).ConfigureAwait(false);
             }
         }
-#endif
 
         private static DataTable BuildBulkInsertDataTable<T>(IDatabase db, IEnumerable<T> list, SqlBulkCopy bulkCopy, SqlBulkCopyOptions sqlBulkCopyOptions)
         {
-            var pocoData = db.PocoDataFactory.ForType(typeof (T));
+            var pocoData = db.PocoDataFactory.ForType(typeof(T));
 
             bulkCopy.BatchSize = 4096;
             bulkCopy.DestinationTableName = pocoData.TableInfo.TableName;
@@ -78,13 +75,13 @@ namespace NPoco
 
                     value = db.DatabaseType.MapParameterValue(value);
 
-                    if (value.GetTheType() == typeof (SqlParameter))
+                    if (value.GetTheType() == typeof(SqlParameter))
                     {
-                        value = ((SqlParameter) value).Value;
+                        value = ((SqlParameter)value).Value;
                     }
 
                     var newType = value.GetTheType();
-                    if (newType != null && newType != typeof (DBNull))
+                    if (newType != null && newType != typeof(DBNull))
                     {
                         table.Columns[i].DataType = newType;
                     }
@@ -97,5 +94,4 @@ namespace NPoco
             return table;
         }
     }
-#endif
-    }
+}

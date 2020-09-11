@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-#if !DNXCORE50
 using System.Data;
-#endif
 using System.Globalization;
 using System.IO;
 using System.Text;
@@ -117,12 +115,10 @@ namespace NPoco.fastJSON
             else if (obj is TimeSpan)
                 _output.Append(((TimeSpan)obj).Ticks);
 
-#if !NET35
             else if (_params.KVStyleStringDictionary == false &&
                 obj is IEnumerable<KeyValuePair<string, object>>)
 
                 WriteStringDictionary((IEnumerable<KeyValuePair<string, object>>)obj);
-#endif
 
             else if (_params.KVStyleStringDictionary == false && obj is IDictionary &&
                 obj.GetType().GetTypeInfo().IsGenericType && obj.GetType().GetGenericArguments()[0] == typeof(string))
@@ -130,13 +126,13 @@ namespace NPoco.fastJSON
                 WriteStringDictionary((IDictionary)obj);
             else if (obj is IDictionary)
                 WriteDictionary((IDictionary)obj);
-#if !DNXCORE50
+
             else if (obj is DataSet)
                 WriteDataset((DataSet)obj);
 
             else if (obj is DataTable)
                 this.WriteDataTable((DataTable)obj);
-#endif
+
             else if (obj is byte[])
                 WriteBytes((byte[])obj);
 
@@ -261,11 +257,7 @@ namespace NPoco.fastJSON
 
         private void WriteBytes(byte[] bytes)
         {
-#if !DNXCORE50
             WriteStringFast(Convert.ToBase64String(bytes, 0, bytes.Length, Base64FormattingOptions.None));
-#else
-            WriteStringFast(Convert.ToBase64String(bytes, 0, bytes.Length));
-#endif
         }
 
         private void WriteDateTime(DateTime dateTime)
@@ -305,7 +297,6 @@ namespace NPoco.fastJSON
             _output.Append(dt.Second.ToString("00", NumberFormatInfo.InvariantInfo));
         }
 
-#if !DNXCORE50
         private DatasetSchema GetSchema(DataTable ds)
         {
             if (ds == null) return null;
@@ -415,7 +406,6 @@ namespace NPoco.fastJSON
             // end datatable
             this._output.Append('}');
         }
-#endif
 
         bool _TypesWritten = false;
         private void WriteObject(object obj)

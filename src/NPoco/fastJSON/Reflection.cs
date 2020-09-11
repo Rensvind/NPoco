@@ -5,9 +5,7 @@ using System.Reflection;
 using System.Collections;
 using System.Text;
 using System.Runtime.Serialization;
-#if !DNXCORE50
 using System.Data;
-#endif
 using System.Collections.Specialized;
 
 namespace NPoco.fastJSON
@@ -36,11 +34,10 @@ namespace NPoco.fastJSON
         StringKeyDictionary,
         NameValue,
         StringDictionary,
-#if !DNXCORE50
         Hashtable,
         DataSet,
         DataTable,
-#endif
+
         Custom,
         Unknown,
     }
@@ -54,9 +51,7 @@ namespace NPoco.fastJSON
         public Reflection.GenericGetter getter;
         public Type[] GenericTypes;
         public string Name;
-#if !NET35
         public string memberName;
-#endif
         public myPropInfoType Type;
         public bool CanWrite;
 
@@ -195,7 +190,6 @@ namespace NPoco.fastJSON
                     if (d.setter != null)
                         d.CanWrite = true;
                     d.getter = Reflection.CreateGetMethod(type, p);
-#if !NET35
                     var att = p.GetCustomAttributes(true);
                     foreach (var at in att)
                     {
@@ -209,7 +203,6 @@ namespace NPoco.fastJSON
                     if (d.memberName != null)
                         sd.Add(d.memberName, d);
                     else
-#endif
                         sd.Add(p.Name.ToLower(), d);
                 }
                 FieldInfo[] fi = type.GetFields(bf);
@@ -222,7 +215,7 @@ namespace NPoco.fastJSON
                         if (d.setter != null)
                             d.CanWrite = true;
                         d.getter = Reflection.CreateGetField(type, f);
-#if !NET35
+
                         var att = f.GetCustomAttributes(true);
                         foreach (var at in att)
                         {
@@ -236,7 +229,7 @@ namespace NPoco.fastJSON
                         if (d.memberName != null)
                             sd.Add(d.memberName, d);
                         else
-#endif
+
                             sd.Add(f.Name.ToLower(), d);
                     }
                 }
@@ -276,11 +269,9 @@ namespace NPoco.fastJSON
                 else
                     d_type = myPropInfoType.Dictionary;
             }
-#if !DNXCORE50
             else if (t == typeof(Hashtable)) d_type = myPropInfoType.Hashtable;
             else if (t == typeof(DataSet)) d_type = myPropInfoType.DataSet;
             else if (t == typeof(DataTable)) d_type = myPropInfoType.DataTable;
-#endif
             else if (IsTypeRegistered(t))
                 d_type = myPropInfoType.Custom;
 
@@ -427,7 +418,6 @@ namespace NPoco.fastJSON
             }
             return (GenericSetter)dynamicSet.CreateDelegate(typeof(GenericSetter));
         }
-#if !DNXCORE50
         internal static FieldInfo GetGetterBackingField(PropertyInfo autoProperty)
         {
             var getMethod = autoProperty.GetGetMethod();
@@ -466,7 +456,6 @@ namespace NPoco.fastJSON
             }
             return null;
         }
-#endif
 
         internal static GenericSetter CreateSetMethod(Type type, PropertyInfo propertyInfo, bool ShowReadOnlyProperties)
         {
@@ -475,12 +464,8 @@ namespace NPoco.fastJSON
             {
                 if (!ShowReadOnlyProperties) return null;
                 // If the property has no setter and it is an auto property, try and create a setter for its backing field instead 
-#if !DNXCORE50
                 var fld = GetGetterBackingField(propertyInfo);
                 return fld != null ? CreateSetField(type, fld) : null;
-#else
-                return null;
-#endif
             }
 
             Type[] arguments = new Type[2];

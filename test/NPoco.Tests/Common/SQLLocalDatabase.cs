@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Data;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using System.IO;
 using NPoco.DatabaseTypes;
 
@@ -31,15 +31,6 @@ namespace NPoco.Tests.Common
 
             RecreateDataBase();
             EnsureSharedConnectionConfigured();
-
-//            Console.WriteLine("Tables (Constructor): " + Environment.NewLine);
-//#if !DNXCORE50
-//            var dt = ((SqlConnection)Connection).GetSchema("Tables");
-//            foreach (DataRow row in dt.Rows)
-//            {
-//                Console.WriteLine((string)row[2]);
-//            }
-//#endif
         }
 
         public override void EnsureSharedConnectionConfigured()
@@ -221,14 +212,6 @@ namespace NPoco.Tests.Common
             ";
             cmd.ExecuteNonQuery();
 
-            //            Console.WriteLine("Tables (CreateDB): " + Environment.NewLine);
-            //#if !DNXCORE50
-            //            var dt = conn.GetSchema("Tables");
-            //            foreach (DataRow row in dt.Rows)
-            //            {
-            //                Console.WriteLine(row[2]);
-            //            }
-            //#endif
 
             cmd.Dispose();
             conn.Close();

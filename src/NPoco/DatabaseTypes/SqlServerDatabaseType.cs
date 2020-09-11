@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
-using System.Data.SqlClient;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Microsoft.Data.SqlClient;
 
 namespace NPoco.DatabaseTypes
 {
@@ -57,25 +57,21 @@ namespace NPoco.DatabaseTypes
             return db.ExecuteScalarHelper(cmd);
         }
 
-#if !NET35 && !NET40
         public override System.Threading.Tasks.Task<object> ExecuteInsertAsync<T>(Database db, DbCommand cmd, string primaryKeyName, bool useOutputClause, T poco, object[] args)
         {
             AdjustSqlInsertCommandText(cmd, useOutputClause);
             return db.ExecuteScalarHelperAsync(cmd);
         }
-#endif
 
         public override string GetExistsSql()
         {
             return "IF EXISTS (SELECT 1 FROM {0} WHERE {1}) SELECT 1 ELSE SELECT 0";
         }
 
-#if !DNXCORE50
         public override void InsertBulk<T>(IDatabase db, IEnumerable<T> pocos)
         {
             SqlBulkCopyHelper.BulkInsert(db, pocos);
         }
-#endif
 
         public override IsolationLevel GetDefaultTransactionIsolationLevel()
         {

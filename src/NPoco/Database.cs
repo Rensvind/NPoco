@@ -22,9 +22,7 @@ using System.Text;
 using NPoco.Expressions;
 using NPoco.Extensions;
 using NPoco.Linq;
-#if !DNXCORE50
-using System.Configuration;
-#endif
+
 
 namespace NPoco
 {
@@ -66,55 +64,6 @@ namespace NPoco
             //}
         }
 
-#if !DNXCORE50 && !NETSTANDARD2_0
-        public Database(string connectionString, string providerName)
-            : this(connectionString, providerName, DefaultEnableAutoSelect)
-        { }
-
-        public Database(string connectionString, string providerName, IsolationLevel isolationLevel)
-            : this(connectionString, providerName, isolationLevel, DefaultEnableAutoSelect)
-        { }
-
-        public Database(string connectionString, string providerName, bool enableAutoSelect)
-            : this(connectionString, providerName, null, enableAutoSelect)
-        { }
-
-        public Database(string connectionString, string providerName, IsolationLevel? isolationLevel, bool enableAutoSelect)
-        {
-            EnableAutoSelect = enableAutoSelect;
-            KeepConnectionAlive = false;
-
-            _connectionString = connectionString;
-            _factory = DbProviderFactories.GetFactory(providerName);
-            var dbTypeName = (_factory == null ? _sharedConnection.GetType() : _factory.GetType()).Name;
-            _dbType = DatabaseType.Resolve(dbTypeName, providerName);
-            _providerName = providerName;
-            _isolationLevel = isolationLevel.HasValue ? isolationLevel.Value : _dbType.GetDefaultTransactionIsolationLevel();
-            _paramPrefix = _dbType.GetParameterPrefix(_connectionString);
-        }
-
-        public Database(string connectionString, DatabaseType dbType)
-            : this(connectionString, dbType, null, DefaultEnableAutoSelect)
-        { }
-
-        public Database(string connectionString, DatabaseType dbType, IsolationLevel? isolationLevel)
-            : this(connectionString, dbType, isolationLevel,  DefaultEnableAutoSelect)
-        { }
-
-        public Database(string connectionString, DatabaseType dbType, IsolationLevel? isolationLevel, bool enableAutoSelect)
-        {
-            EnableAutoSelect = enableAutoSelect;
-            KeepConnectionAlive = false;
-
-            _connectionString = connectionString;
-            _dbType = dbType;
-            _providerName = _dbType.GetProviderName();
-            _factory = DbProviderFactories.GetFactory(_dbType.GetProviderName());
-            _isolationLevel = isolationLevel.HasValue ? isolationLevel.Value : _dbType.GetDefaultTransactionIsolationLevel();
-            _paramPrefix = _dbType.GetParameterPrefix(_connectionString);
-        }
-#endif
-
         public Database(string connectionString, DatabaseType databaseType, DbProviderFactory provider)
             : this(connectionString, databaseType, provider, null, DefaultEnableAutoSelect)
         { }
@@ -132,51 +81,6 @@ namespace NPoco
             _paramPrefix = _dbType.GetParameterPrefix(_connectionString);
         }
 
-#if !DNXCORE50 && !NETSTANDARD2_0
-        public Database(string connectionStringName)
-            : this(connectionStringName, DefaultEnableAutoSelect)
-        { }
-
-        public Database(string connectionStringName, IsolationLevel isolationLevel)
-            : this(connectionStringName, isolationLevel, DefaultEnableAutoSelect)
-        { }
-
-        public Database(string connectionStringName, bool enableAutoSelect)
-            : this(connectionStringName, (IsolationLevel?) null, enableAutoSelect)
-        { }
-
-        public Database(string connectionStringName, IsolationLevel? isolationLevel,  bool enableAutoSelect)
-        {
-            EnableAutoSelect = enableAutoSelect;
-            KeepConnectionAlive = false;
-
-            // Use first?
-            if (connectionStringName == "") connectionStringName = ConfigurationManager.ConnectionStrings[0].Name;
-
-            // Work out connection string and provider name
-            var providerName = "System.Data.SqlClient";
-            if (ConfigurationManager.ConnectionStrings[connectionStringName] != null)
-            {
-                if (!string.IsNullOrEmpty(ConfigurationManager.ConnectionStrings[connectionStringName].ProviderName))
-                {
-                    providerName = ConfigurationManager.ConnectionStrings[connectionStringName].ProviderName;
-                }
-            }
-            else
-            {
-                throw new InvalidOperationException("Can't find a connection string with the name '" + connectionStringName + "'");
-            }
-
-            // Store factory and connection string
-            _connectionString = ConfigurationManager.ConnectionStrings[connectionStringName].ConnectionString;
-            _providerName = providerName;
-
-            _factory = DbProviderFactories.GetFactory(_providerName);
-            _dbType = DatabaseType.Resolve(_factory.GetType().Name, _providerName);
-            _isolationLevel = isolationLevel.HasValue ? isolationLevel.Value : _dbType.GetDefaultTransactionIsolationLevel();
-            _paramPrefix = _dbType.GetParameterPrefix(_connectionString);
-        }
-#endif
 
         private readonly DatabaseType _dbType;
         public DatabaseType DatabaseType { get { return _dbType; } }
@@ -1624,11 +1528,7 @@ namespace NPoco
             {
                 if (id == 0 && !string.IsNullOrEmpty(preparedStatement.VersionName) && VersionException == VersionExceptionHandling.Exception)
                 {
-#if DNXCORE50
-                    throw new Exception(string.Format("A Concurrency update occurred in table '{0}' for primary key value(s) = '{1}' and version = '{2}'", tableName, string.Join(",", preparedStatement.PrimaryKeyValuePairs.Values.Select(x => x.ToString()).ToArray()), preparedStatement.VersionValue));
-#else
                     throw new DBConcurrencyException(string.Format("A Concurrency update occurred in table '{0}' for primary key value(s) = '{1}' and version = '{2}'", tableName, string.Join(",", preparedStatement.PrimaryKeyValuePairs.Values.Select(x => x.ToString()).ToArray()), preparedStatement.VersionValue));
-#endif
                 }
 
                 // Set Version
