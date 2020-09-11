@@ -1,4 +1,4 @@
-﻿using System.Data.Common;
+using System.Data.Common;
 #if !NET35 
 using System.Threading.Tasks;
 #endif
